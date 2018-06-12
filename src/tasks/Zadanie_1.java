@@ -72,9 +72,9 @@ public class Zadanie_1 {
 		return matrix;
 	}
 
-	static List<String> fisherImpl_1D() throws FileNotFoundException {
+	public List<String> fisherImpl_1D(String[][] baza) throws FileNotFoundException {
 
-		String[][] baza = new LoadFromFile().load();
+		List<String> result = new ArrayList<>();
 
 		List<String> result = new ArrayList<>();
 

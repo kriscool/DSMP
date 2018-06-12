@@ -15,6 +15,8 @@ import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import tasks.LoadFromFile;
+import tasks.Zadanie_1;
 
 public class SPMDController {
 
@@ -55,11 +57,14 @@ public class SPMDController {
     TextArea classifiersTextArea;
 
     @FXML
-    ComboBox classifiersComboBoxClassifiers;
+    ComboBox<Integer> classifiersComboBoxClassifiers;
 
     @FXML
-    ComboBox classifiersKElemnts;
-
+    ComboBox<Integer> classifiersKElemnts;
+    
+    private LoadFromFile db = new LoadFromFile();
+    private String results[][] ;
+    
     public void initialize(){
         for(int i=1;i<65;i++){
             featuresSelectionFeatureNumber.getItems().add(i);
@@ -78,66 +83,13 @@ public class SPMDController {
     List<DataObject> listOfObjectQuerus = new ArrayList<DataObject>();
     double[][] datasetAcer;
     double[][] datasetQuerus;
+    
     @FXML
-    private void featureSelectionGetData(){
+    private void featureSelectionGetData() throws FileNotFoundException{
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Open Resource File");
         File selectedFile = fileChooser.showOpenDialog(null);
-
-
-
-        Scanner in;
-
-        int iteratorRow = 0;
-        try {
-
-            in = new Scanner(selectedFile);
-            while(in.hasNextLine()){
-                DataObject data = new DataObject();
-                String zdanie = in.nextLine();
-                StringTokenizer st = new StringTokenizer(zdanie, ",");
-                data.setName(st.nextToken());
-                while (st.hasMoreTokens()) {
-                    data.setDataInColumn(Double.parseDouble(st.nextToken()), iteratorRow);
-                    iteratorRow++;
-                }
-                iteratorRow=0;
-                if(data.getName().contains("Acer")){
-                    listOfObjectAcer.add(data);
-                }else{
-                    listOfObjectQuerus.add(data);
-                }
-            }
-        } catch (FileNotFoundException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-
-        datasetAcer= new double[listOfObjectAcer.size()][64];
-        datasetQuerus=new double[listOfObjectQuerus.size()][64];
-        int indexTabAcer=0;
-        for(DataObject object:listOfObjectAcer){
-            for(int i=0;i<64;i++){
-                datasetAcer[indexTabAcer][i]=object.getData()[i];
-            }
-            indexTabAcer++;
-        }
-        int indexTabQuerus=0;
-        for(DataObject object:listOfObjectQuerus){
-            for(int i=0;i<64;i++){
-                datasetQuerus[indexTabQuerus][i]=object.getData()[i];
-            }
-            indexTabQuerus++;
-
-        }
-
-       // Matrix a = new Matrix(datasetAcer);
-
-    //    datasetAcer= a.transpose().getArray();;
-   //     Matrix b = new Matrix(datasetQuerus);
-//
-    //    datasetQuerus= a.transpose().getArray();;
-
+        results =db.load(selectedFile);
     }
 
 
@@ -146,9 +98,13 @@ public class SPMDController {
     private void featureSaveFile(){}
 
     @FXML
-    private void featureSelectionCompute(){
-      //  Fischer f = new Fischer();
-      //  featuresSelectionTextArea.setText(Double.toString(f.fisher(datasetAcer,datasetQuerus,new int[]{featuresSelectionFeatureNumber.getValue()})));
+    private void featureSelectionCompute() throws FileNotFoundException{
+    	if(featuresSelectionFeatureNumber.getValue()==1){
+    	Zadanie_1 zad1 = new Zadanie_1();
+    	featuresSelectionTextArea.setText(zad1.fisherImpl_1D(results).get(0));
+    	}else{
+    		
+    	}
     }
 
     @FXML

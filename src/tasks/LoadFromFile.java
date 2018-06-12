@@ -8,12 +8,9 @@ import java.util.Scanner;
 
 public class LoadFromFile {
 
-	private String path = "C:\\Users\\wiku\\Desktop\\DSMP\\Maple_Oak.txt";
-	private File database = new File(path);
+	public String[][] load(File file) throws FileNotFoundException {
 
-	String[][] load() throws FileNotFoundException {
-
-		Scanner sc = new Scanner(database);
+		Scanner sc = new Scanner(file);
 
 		List<String> lines = new ArrayList<String>();
 		while (sc.hasNextLine()) {
