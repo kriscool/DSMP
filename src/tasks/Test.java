@@ -9,7 +9,10 @@ public class Test {
 		LoadFromFile db = new LoadFromFile();
 		String results[][] = db.load();
 
-		System.out.println(Zadanie_1.fisherImpl_1D().get(0));
+		Zadanie_1 zad1 = new Zadanie_1(2);
+		// zad1.fisherImpl_ND(1);
+		// zad1.fisherImpl_1D();
+		// System.out.println(Zadanie_1.fisherImpl_1D().get(0));
 
 	}
 

@@ -31,6 +31,7 @@ public class LoadFromFile {
 				loaded[j][i] = actual[j];
 			}
 		}
+		sc.close();
 
 		return loaded;
 	}

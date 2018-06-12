@@ -2,24 +2,49 @@ package tasks;
 
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+
+import org.apache.commons.math3.util.Combinations;
 
 public class Zadanie_1 {
 
-	double fisher;
+	Zadanie_1(int n) throws FileNotFoundException {
+		if (n == 1) {
+			fisherImpl_1D();
+		} else {
+			fisherImpl_ND(n);
+		}
+
+	}
 
 	List<String> fisherImpl_ND(int liczba_cech) throws FileNotFoundException {
 
-		List<String> result = new ArrayList<>();
 		String[][] baza = new LoadFromFile().load();
+
+		double[][] matrixClassA = crtMatrixClassA(baza);
+		double[][] matrixClassB = crtMatrixClassB(baza);
+
+		Combinations combinations = new Combinations(matrixClassA.length, liczba_cech);
+
+		Iterator<int[]> itr = combinations.iterator();
+		itr.next();
+		itr.next();
+		System.out.println(itr.next()[0]);
+
+		// while (itr.hasNext()) {
+		// int[] element = itr.next();
+		// System.out.println(element[1]);
+		// }
 
 		return null;
 	}
 
 	static List<String> fisherImpl_1D() throws FileNotFoundException {
 
-		List<String> result = new ArrayList<>();
 		String[][] baza = new LoadFromFile().load();
+
+		List<String> result = new ArrayList<>();
 
 		int licznosc_klasy_a = 0;
 		int licznosc_klasy_b = 0;
@@ -93,6 +118,41 @@ public class Zadanie_1 {
 		System.out.println(wynik);
 		result.add(wynik);
 		return result;
+	}
+
+	double[][] crtMatrixClassA(String[][] baza) {
+
+		int licznosc_klasy_a = 0;
+
+		for (int i = 0; i < baza[0].length; i++) {
+			if (baza[0][i].matches("Acer(.*)")) {
+				licznosc_klasy_a++;
+			}
+		}
+		double[][] matrixClassA = new double[baza.length - 1][licznosc_klasy_a];
+		for (int i = 1; i < baza.length; i++) {
+
+			for (int j = 0; j < licznosc_klasy_a; j++) {
+				matrixClassA[i - 1][j] = Double.parseDouble(baza[i][j]);
+			}
+		}
+		return matrixClassA;
+	}
+
+	double[][] crtMatrixClassB(String[][] baza) {
+		int licznosc_klasy_b = 0;
+		for (int i = 0; i < baza[0].length; i++) {
+			if (!(baza[0][i].matches("Acer(.*)"))) {
+				licznosc_klasy_b++;
+			}
+		}
+		double[][] matrixClassB = new double[baza.length - 1][licznosc_klasy_b];
+		for (int i = 1; i < baza.length; i++) {
+			for (int j = licznosc_klasy_b; j > 0; j--) {
+				matrixClassB[i - 1][licznosc_klasy_b - j] = Double.parseDouble(baza[i][baza[0].length - j]);
+			}
+		}
+		return matrixClassB;
 	}
 
 }
