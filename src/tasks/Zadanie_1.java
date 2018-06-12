@@ -12,72 +12,7 @@ import Jama.Matrix;
 
 public class Zadanie_1 {
 
-	double fisher = 0;
-	int[] cechy;
-
-	Zadanie_1(int n) throws Exception {
-		if (n == 1) {
-			fisherImpl_1D();
-		} else {
-			fisherImpl_ND(n);
-		}
-
-	}
-
-	List<String> fisherImpl_ND(int liczba_cech) throws Exception {
-
-		String[][] baza = new LoadFromFile().load();
-
-		double[][] tablicaClassA = crtMatrixClassA(baza);
-		double[][] tablicaClassB = crtMatrixClassB(baza);
-
-		Combinations combinations = new Combinations(tablicaClassA.length, liczba_cech);
-
-		Iterator<int[]> itr = combinations.iterator();
-
-		while (itr.hasNext()) {
-			int[] cechy = itr.next();
-
-			double[] srednieDlaNcechKlasaA = new double[liczba_cech];
-			double[] srednieDlaNcechKlasaB = new double[liczba_cech];
-			double licznikFisheraDlaNcech = 0;
-			double sumaWyznacznikowMacierzydlaNcech = 0;
-
-			for (int i = 0; i < cechy.length; i++) {
-				srednieDlaNcechKlasaA[i] = liczSrednia(tablicaClassA, cechy[i]);
-				srednieDlaNcechKlasaB[i] = liczSrednia(tablicaClassB, cechy[i]);
-			}
-			Matrix srednieDlaKlasyA = new Matrix(zrobMacierzZeSredniej(srednieDlaNcechKlasaA, tablicaClassA[0].length));
-			Matrix srednieDlaKlasyB = new Matrix(zrobMacierzZeSredniej(srednieDlaNcechKlasaB, tablicaClassB[0].length));
-			Matrix klasaA = new Matrix(zrobMacierzDlaKlasy(cechy, tablicaClassA));
-			Matrix klasaB = new Matrix(zrobMacierzDlaKlasy(cechy, tablicaClassB));
-
-			licznikFisheraDlaNcech = sredniaZMacierzy(srednieDlaNcechKlasaA, srednieDlaNcechKlasaB);
-
-			Matrix klasaAMinusSrednia = klasaA.minus(srednieDlaKlasyA);
-			Matrix macierzTransponowanaKlasaA = klasaAMinusSrednia.transpose();
-			Matrix macierzKowariancjiKlasaA = klasaAMinusSrednia.times(macierzTransponowanaKlasaA);
-			Matrix macierzKowariancjiPodzielonaKlasaA = macierzKowariancjiKlasaA
-					.times((double) 1 / klasaA.getColumnDimension());
-			double wyznacznikKlasaA = macierzKowariancjiPodzielonaKlasaA.det();
-
-			Matrix klasaBMinusSrednia = klasaB.minus(srednieDlaKlasyB);
-			Matrix macierzTransponowanaKlasaB = klasaBMinusSrednia.transpose();
-			Matrix macierzKowariancjiKlasaB = klasaBMinusSrednia.times(macierzTransponowanaKlasaB);
-			Matrix macierzKowariancjiPodzielonaKlasaB = macierzKowariancjiKlasaB
-					.times((double) 1 / klasaB.getColumnDimension());
-			double wyznacznikKlasaB = macierzKowariancjiPodzielonaKlasaB.det();
-
-			sumaWyznacznikowMacierzydlaNcech = wyznacznikKlasaA + wyznacznikKlasaB;
-
-			double fisherr = licznikFisheraDlaNcech / sumaWyznacznikowMacierzydlaNcech;
-
-			if (fisherr > this.fisher) {
-				this.fisher = fisherr;
-				this.cechy = cechy;
-			}
-
-		}
+	double fisher;
 
 		poprawCechy();
 
