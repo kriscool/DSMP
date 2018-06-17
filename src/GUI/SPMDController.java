@@ -5,11 +5,7 @@ import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-import java.util.Scanner;
-import java.util.StringTokenizer;
-import java.util.concurrent.ThreadLocalRandom;
 
-import application.DataObject;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
@@ -18,8 +14,8 @@ import javafx.scene.control.TextField;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import tasks.LoadFromFile;
-import tasks.LosowanieBezPotworzen;
 import tasks.Task3;
+import tasks.Task4;
 import tasks.Zadanie_1;
 
 public class SPMDController {
@@ -100,6 +96,7 @@ public class SPMDController {
             classifiersKElemnts.getItems().add(i);
         }
 
+        classifiersKElemnts.getSelectionModel().select(0);
     }
 
     
@@ -178,6 +175,7 @@ public class SPMDController {
 
     @FXML
     private void classifiersExecute(){
+    	Task4 t = new Task4();
     	if(classifiersMethodToClissiferComboBox.getValue().equals("Kroswalidation")){
     		double sum=0.0;
     		int beginA=0;
@@ -205,8 +203,9 @@ public class SPMDController {
         	endA+=matrixToTrainingA[0].length;
         	beginB+=endB;
         	endB=matrixToTrainingB[0].length;
-    			sum+=getSimpleClassifierKroswalidation(beginA,endA,beginB,endB);
-    			System.out.println("Suma"+sum);
+        	
+    			sum+=t.getSimpleClassifierKroswalidation(beginA,endA,beginB,endB,classifiersComboBoxClassifiers.getValue(),matrixA,matrixB,matrixToTrainingA,matrixToTrainingB,classifiersKElemnts.getValue());
+    			
     		}
     	   	classifiersTextArea.setText("Skutecznoœæ clasyfikatora " + (int)sum/iteration +"%");
     	}else if(classifiersMethodToClissiferComboBox.getValue().equals("Bootstrap")){
@@ -218,7 +217,6 @@ public class SPMDController {
         	int howManyToTrainB=(int) (matrixB[0].length*percent);
         	int[] indexTabA = new int[howManyToTrainA];
         	int[] indexTabB = new int[howManyToTrainB];
-        	Random rand = new Random();
         	
         	List<Integer> wylosowane = new ArrayList<Integer>();
     		Random r = new Random();
@@ -241,213 +239,18 @@ public class SPMDController {
     		for(int i = 0; i < wylosowane.size(); i++) indexTabB[i] = wylosowane.get(i);
     		wylosowane.clear();
     		
-    		 sum+=getSimpleClassifierBootstrap(indexTabA,indexTabB);
-    		 System.out.println(sum);
+    			sum+=t.getSimpleClassifierBootstrap(classifiersComboBoxClassifiers.getValue(),matrixA,matrixB,matrixToTrainingA,matrixToTrainingB,classifiersKElemnts.getValue(),indexTabA,indexTabB);
     		}
 
     	   	classifiersTextArea.setText("Skutecznoœæ clasyfikatora " + (int)sum/classifiersIterationNumberBootstrap.getValue() +"%");
     	}else{
-    	   	classifiersTextArea.setText("Skutecznoœæ clasyfikatora " + (int)getSimpleClassifier(matrixToTrainingA[0].length,matrixA[0].length,matrixToTrainingB[0].length,matrixB[0].length) +"%");
+    		double sum = t.getSimpleClassifier(matrixToTrainingA[0].length,matrixA[0].length,matrixToTrainingB[0].length,matrixB[0].length, classifiersComboBoxClassifiers.getValue(),matrixA,matrixB,matrixToTrainingA,matrixToTrainingB,classifiersKElemnts.getValue());
+    		 	classifiersTextArea.setText("Skutecznoœæ clasyfikatora " + (int)sum +"%");
     	}
     	
    }
     
-    private double getSimpleClassifierKroswalidation(int beginA,int endA,int beginB,int endB){
-    	int difference=matrixA[0].length-matrixToTrainingA[0].length;
-    	int differenceB=matrixB[0].length-matrixToTrainingB[0].length;
-    	int countA=0;
-    	int countB=0;
-    	Task3 task = new Task3();
-    	int sum=0;
-    	int sumB=0;
-    	if(classifiersComboBoxClassifiers.getValue().equals("KNN")){
-    		for(int i=0;i<matrixA[0].length ;i++){
-    			if(i<beginA || (i>endA && endA<matrixA[0].length )){
-	    			sum++;
-	    			if(task.KNN(matrixToTrainingA, matrixToTrainingB, classifiersKElemnts.getValue(), changeColumnToRow(matrixA,i)).equals("a")){
-	    				countA++;
-	    			}
-	    		}
-    		}
-    		for(int i=0; i<matrixB[0].length;i++){
-    			if(i<beginB || (i>endB && endB<matrixB[0].length)){
-    			sumB++;
-    			if(task.KNN(matrixToTrainingA, matrixToTrainingB, classifiersKElemnts.getValue(), changeColumnToRow(matrixB,i)).equals("b")){
-        			countB++;
-    			}}
-    		}
-    	}else if(classifiersComboBoxClassifiers.getValue().equals("NN")){
-    		for(int i=0; i<matrixA[0].length;i++){
-    			if(i<beginA || (i>endA && endA<matrixA[0].length )){
-	    			sum++;
-	    			if(task.KNN(matrixToTrainingA, matrixToTrainingB, 1, changeColumnToRow(matrixA,i)).equals("a")){
-	    				countA++;
-	    			}
-    			}
-    		}
-    		for(int i=0; i<matrixB[0].length;i++){
-    			if(i<beginB || (i>endB && endB<matrixB[0].length)){
-    			sumB++;
-    			if(task.KNN(matrixToTrainingA, matrixToTrainingB, 1, changeColumnToRow(matrixB,i)).equals("b")){
-        			countB++;
-    			}
-    			}
-    		}
-    	}else{
-    		for(int i=0;i<matrixA[0].length;i++){
-    			if(i<beginA || (i>endA && endA<matrixA[0].length )){
-	    			sum++;
-	    			if(task.MN(matrixToTrainingA, matrixToTrainingB, changeColumnToRow(matrixA,i)).equals("a")){
-	    				countA++;
-	    			}
-    			}
-    		}
-    		for(int i=0;i<matrixB[0].length;i++){
-    			if(i<beginB || (i>endB && endB<matrixB[0].length)){
-	    			sumB++;
-	    			if(task.MN(matrixToTrainingA, matrixToTrainingB, changeColumnToRow(matrixB,i)).equals("b")){
-	        			countB++;
-	    			}
-    			}
-    		}
-    	}
-    	double skutecznoscA=countA/(double)sum*100;
-    	double skutecznoscB=countB/(double)sumB*100;
-    	return (skutecznoscA+skutecznoscB)/2;
-    }
-    
-    
-    private Boolean isInIndex(int index,int[] tab){
-    	for(int i=0;i<tab.length;i++){
-    		if(tab[i]==index){
-    			return true;
-    		}
-    	}
-    	return false;
-    }
-    
-    
-    
-    private double getSimpleClassifierBootstrap(int[] trainIndex,int[] trainIndexB){
-    	int difference=matrixA[0].length-matrixToTrainingA[0].length;
-    	int differenceB=matrixB[0].length-matrixToTrainingB[0].length;
-    	int countA=0;
-    	int countB=0;
-    	Task3 task = new Task3();
-    	int sum=0;
-    	int sumB=0;
-    	if(classifiersComboBoxClassifiers.getValue().equals("KNN")){
-    		for(int i=0;i<matrixA[0].length ;i++){
-    			if(!isInIndex(i,trainIndex)){
-    				sum++;
-	    			if(task.KNN(matrixToTrainingA, matrixToTrainingB, classifiersKElemnts.getValue(), changeColumnToRow(matrixA,i)).equals("a")){
-	    				countA++;
-	    			}
-    			}
-    		}
-    		for(int i=0;i<matrixB[0].length;i++){
-    			if(!isInIndex(i,trainIndexB)){
-    				sumB++;
-    			if(task.KNN(matrixToTrainingA, matrixToTrainingB, classifiersKElemnts.getValue(), changeColumnToRow(matrixB,i)).equals("b")){
-        			countB++;
-    			}
-    			}
-    		}
-    	}else if(classifiersComboBoxClassifiers.getValue().equals("NN")){
-    		for(int i=0; i<matrixA[0].length ;i++){
-	    			if(isInIndex(i,trainIndex)==false){
-	    				sum++;
-		    			if(task.KNN(matrixToTrainingA, matrixToTrainingB, 1, changeColumnToRow(matrixA,i)).equals("a")){
-		    				countA++;
-	    			}
-    			}
-    		}
-    		for(int i=0;i<matrixB[0].length;i++){
-    			if(isInIndex(i,trainIndexB)==false){
-    				sumB++;
-	    			if(task.KNN(matrixToTrainingA, matrixToTrainingB, 1, changeColumnToRow(matrixB,i)).equals("b")){
-	        			countB++;
-	    			}
-    			}
-    		}
-    	}else{
-    		for(int i=0; i<matrixA[0].length ;i++){
-    			if(isInIndex(i,trainIndex)==false){
-    				sum++;
-	    			if(task.MN(matrixToTrainingA, matrixToTrainingB, changeColumnToRow(matrixA,i)).equals("a")){
-	    				countA++;
-	    			}
-    			}
-    		}
-    		for(int i=0;i<matrixB[0].length;i++){
-    			if(isInIndex(i,trainIndexB)==false){
-    				sumB++;
-	    			if(task.MN(matrixToTrainingA, matrixToTrainingB, changeColumnToRow(matrixA,i)).equals("b")){
-	        			countB++;
-	    			}
-    			}
-    		}
-    	}
-    	double skutecznoscA=countA/(double)sum*100;
-    	double skutecznoscB=countB/(double)sumB*100;
-    	return (skutecznoscA+skutecznoscB)/2;
-    }
-    private double getSimpleClassifier(int beginA,int endA,int beginB,int endB){
-    	int difference=matrixA[0].length-matrixToTrainingA[0].length;
-    	int differenceB=matrixB[0].length-matrixToTrainingB[0].length;
-    	int countA=0;
-    	int countB=0;
-    	Task3 task = new Task3();
-    	if(classifiersComboBoxClassifiers.getValue().equals("KNN")){
-    		for(int i=beginA;i<endA;i++){
-    			if(task.KNN(matrixToTrainingA, matrixToTrainingB, classifiersKElemnts.getValue(), changeColumnToRow(matrixA,i)).equals("a")){
-    				countA++;
-    			}
-    		}
-    		for(int i=beginB;i<endB;i++){
-    			if(task.KNN(matrixToTrainingA, matrixToTrainingB, classifiersKElemnts.getValue(), changeColumnToRow(matrixB,i)).equals("b")){
-        			countB++;
-    			}
-    		}
-    	}else if(classifiersComboBoxClassifiers.getValue().equals("NN")){
-    		for(int i=beginA;i<endA;i++){
-    			if(task.KNN(matrixToTrainingA, matrixToTrainingB, 1, changeColumnToRow(matrixA,i)).equals("a")){
-    				countA++;
-    			}
-    		}
-    		for(int i=beginB;i<endB;i++){
-    			if(task.KNN(matrixToTrainingA, matrixToTrainingB, 1, changeColumnToRow(matrixB,i)).equals("b")){
-        			countB++;
-    			}
-    		}
-    	}else{
-    		for(int i=beginA;i<endA;i++){
-    			if(task.MN(matrixToTrainingA, matrixToTrainingB, changeColumnToRow(matrixA,i)).equals("a")){
-    				countA++;
-    			}
-    		}
-    		for(int i=beginB;i<endB;i++){
-    			if(task.MN(matrixToTrainingA, matrixToTrainingB, changeColumnToRow(matrixB,i)).equals("b")){
-        			countB++;
-    			}
-    		}
-    	}
-    	double skutecznoscA=countA/(double)difference*100;
-    	double skutecznoscB=countB/(double)differenceB*100;
-    	return (skutecznoscA+skutecznoscB)/2;
-    }
-    private double[] changeColumnToRow(double[][] a,int column){
-    	double[] temp=new double[a.length];
-    	for(int i=0;i<a.length;i++){
-    		for(int j=0;j<a[0].length;j++){
-    			if(j==column){
-    				temp[i]=a[i][j];
-    			}
-    		}
-    	}
-    	return temp;
-    }
-    
+
     double[][] crtMatrixClassA(String[][] baza) {
 
 		int licznosc_klasy_a = 0;
