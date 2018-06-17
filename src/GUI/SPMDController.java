@@ -8,6 +8,7 @@ import java.util.Random;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
@@ -67,6 +68,9 @@ public class SPMDController {
     @FXML
     ComboBox<String> classifiersMethodToClissiferComboBox;
     
+    @FXML
+	CheckBox featuresSFSMethod;
+    
     private LoadFromFile db = new LoadFromFile();
     private String results[][] ;
     private double[][] matrixToTrainingA;
@@ -118,16 +122,24 @@ public class SPMDController {
     @FXML
     private void featureSelectionCompute() throws Exception{
     	Zadanie_1 zad1 = new Zadanie_1();
-    	if(featuresSelectionFeatureNumber.getValue()==1){
-    	featuresSelectionTextArea.setText(zad1.fisherImpl_1D(results).get(0));
-    	}else{
-    		List<String> a= zad1.fisherImpl_ND(featuresSelectionFeatureNumber.getValue(),results);
-    		String output="";
-    		for(String aS:a){
-    			output+=aS;
-    		}
-    		featuresSelectionTextArea.setText(output);
-    	}
+		if (featuresSelectionFeatureNumber.getValue() == 1) {
+			featuresSelectionTextArea.setText(zad1.fisherImpl_1D(results).get(0));
+		} else {
+			String output = "";
+			if (featuresSFSMethod.isSelected()) {
+				List<String> a = zad1.fisherImpl_ND(featuresSelectionFeatureNumber.getValue(), results, true);
+				for (String aS : a) {
+					output += aS;
+				}
+			} else {
+				List<String> a = zad1.fisherImpl_ND(featuresSelectionFeatureNumber.getValue(), results, false);
+				for (String aS : a) {
+					output += aS;
+				}
+			}
+
+			featuresSelectionTextArea.setText(output);
+		}
     }
 
     @FXML

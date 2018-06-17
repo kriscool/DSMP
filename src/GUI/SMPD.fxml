@@ -9,6 +9,7 @@
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.text.Text?>
+<?import javafx.scene.control.CheckBox?>
 
 <AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8.0.141" xmlns:fx="http://javafx.com/fxml/1" fx:controller="GUI.SPMDController">
    <children>
@@ -19,7 +20,8 @@
               <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                      <children>
                         <Button fx:id="featuresSelectionGetData" layoutX="26.0" layoutY="37.0" mnemonicParsing="false" onAction="#featureSelectionGetData" text="Get Data" />
-                        <Button fx:id="featuresSelectionSaveToFile" layoutX="27.0" layoutY="122.0" mnemonicParsing="false" onAction="#featureSaveFile" text="Save File" />
+                        <Button fx:id="featuresSelectionSaveToFile" layoutX="27.0" layoutY="122.0" mnemonicParsing="false" onAction="#featureSaveFile" text="Save File" />       
+                        <CheckBox  fx:id="featuresSFSMethod" layoutX="26.0" layoutY="70.0"  text="SFS Method" />
                         <Button fx:id="featuresSelectionCompute" layoutX="294.0" layoutY="37.0" mnemonicParsing="false" onAction="#featureSelectionCompute" text="Compute" />
                         <TextArea fx:id="featuresSelectionTextArea" layoutX="386.0" layoutY="22.0" prefHeight="200.0" prefWidth="200.0" />
                         <ComboBox fx:id="featuresSelectionFeatureNumber" layoutX="123.0" layoutY="37.0" prefWidth="150.0" />

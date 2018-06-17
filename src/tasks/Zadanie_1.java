@@ -3,6 +3,7 @@ package tasks;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -14,69 +15,177 @@ public class Zadanie_1 {
 	private double fisher;
 	private int[] cechy;
 
-	public List<String> fisherImpl_ND(int liczba_cech,String[][] baza ) throws Exception {
-
+	public List<String> fisherImpl_ND(int liczba_cech, String[][] baza, boolean sfs) throws Exception {
 
 		double[][] tablicaClassA = crtMatrixClassA(baza);
 		double[][] tablicaClassB = crtMatrixClassB(baza);
 
-		Combinations combinations = new Combinations(tablicaClassA.length, liczba_cech);
+		if (sfs == false) {
+			Combinations combinations = new Combinations(tablicaClassA.length, liczba_cech);
 
-		Iterator<int[]> itr = combinations.iterator();
+			Iterator<int[]> itr = combinations.iterator();
 
-		while (itr.hasNext()) {
-			int[] cechy = itr.next();
+			while (itr.hasNext()) {
+				int[] cechy = itr.next();
 
-			double[] srednieDlaNcechKlasaA = new double[liczba_cech];
-			double[] srednieDlaNcechKlasaB = new double[liczba_cech];
-			double licznikFisheraDlaNcech = 0;
-			double sumaWyznacznikowMacierzydlaNcech = 0;
+				double[] srednieDlaNcechKlasaA = new double[liczba_cech];
+				double[] srednieDlaNcechKlasaB = new double[liczba_cech];
+				double licznikFisheraDlaNcech = 0;
+				double sumaWyznacznikowMacierzydlaNcech = 0;
 
-			for (int i = 0; i < cechy.length; i++) {
-				srednieDlaNcechKlasaA[i] = liczSrednia(tablicaClassA, cechy[i]);
-				srednieDlaNcechKlasaB[i] = liczSrednia(tablicaClassB, cechy[i]);
+				for (int i = 0; i < cechy.length; i++) {
+					srednieDlaNcechKlasaA[i] = liczSrednia(tablicaClassA, cechy[i]);
+					srednieDlaNcechKlasaB[i] = liczSrednia(tablicaClassB, cechy[i]);
+				}
+				Matrix srednieDlaKlasyA = new Matrix(
+						zrobMacierzZeSredniej(srednieDlaNcechKlasaA, tablicaClassA[0].length));
+				Matrix srednieDlaKlasyB = new Matrix(
+						zrobMacierzZeSredniej(srednieDlaNcechKlasaB, tablicaClassB[0].length));
+				Matrix klasaA = new Matrix(zrobMacierzDlaKlasy(cechy, tablicaClassA));
+				Matrix klasaB = new Matrix(zrobMacierzDlaKlasy(cechy, tablicaClassB));
+
+				licznikFisheraDlaNcech = sredniaZMacierzy(srednieDlaNcechKlasaA, srednieDlaNcechKlasaB);
+
+				Matrix klasaAMinusSrednia = klasaA.minus(srednieDlaKlasyA);
+				Matrix macierzTransponowanaKlasaA = klasaAMinusSrednia.transpose();
+				Matrix macierzKowariancjiKlasaA = klasaAMinusSrednia.times(macierzTransponowanaKlasaA);
+				Matrix macierzKowariancjiPodzielonaKlasaA = macierzKowariancjiKlasaA
+						.times((double) 1 / klasaA.getColumnDimension());
+				double wyznacznikKlasaA = macierzKowariancjiPodzielonaKlasaA.det();
+
+				Matrix klasaBMinusSrednia = klasaB.minus(srednieDlaKlasyB);
+				Matrix macierzTransponowanaKlasaB = klasaBMinusSrednia.transpose();
+				Matrix macierzKowariancjiKlasaB = klasaBMinusSrednia.times(macierzTransponowanaKlasaB);
+				Matrix macierzKowariancjiPodzielonaKlasaB = macierzKowariancjiKlasaB
+						.times((double) 1 / klasaB.getColumnDimension());
+				double wyznacznikKlasaB = macierzKowariancjiPodzielonaKlasaB.det();
+
+				sumaWyznacznikowMacierzydlaNcech = wyznacznikKlasaA + wyznacznikKlasaB;
+
+				double fisherr = licznikFisheraDlaNcech / sumaWyznacznikowMacierzydlaNcech;
+
+				if (fisherr > this.fisher) {
+					this.fisher = fisherr;
+					this.cechy = cechy;
+				}
+
 			}
-			Matrix srednieDlaKlasyA = new Matrix(zrobMacierzZeSredniej(srednieDlaNcechKlasaA, tablicaClassA[0].length));
-			Matrix srednieDlaKlasyB = new Matrix(zrobMacierzZeSredniej(srednieDlaNcechKlasaB, tablicaClassB[0].length));
-			Matrix klasaA = new Matrix(zrobMacierzDlaKlasy(cechy, tablicaClassA));
-			Matrix klasaB = new Matrix(zrobMacierzDlaKlasy(cechy, tablicaClassB));
 
-			licznikFisheraDlaNcech = sredniaZMacierzy(srednieDlaNcechKlasaA, srednieDlaNcechKlasaB);
+			poprawCechy();
 
-			Matrix klasaAMinusSrednia = klasaA.minus(srednieDlaKlasyA);
-			Matrix macierzTransponowanaKlasaA = klasaAMinusSrednia.transpose();
-			Matrix macierzKowariancjiKlasaA = klasaAMinusSrednia.times(macierzTransponowanaKlasaA);
-			Matrix macierzKowariancjiPodzielonaKlasaA = macierzKowariancjiKlasaA
-					.times((double) 1 / klasaA.getColumnDimension());
-			double wyznacznikKlasaA = macierzKowariancjiPodzielonaKlasaA.det();
+			String wynik = "Najwyzszy fisher dla cech: " + Arrays.toString(cechy) + "\nF" + Arrays.toString(cechy)
+					+ " = " + this.fisher;
+			System.out.println(wynik);
+			List<String> result = new ArrayList<>();
+			result.add(String.valueOf(wynik));
 
-			Matrix klasaBMinusSrednia = klasaB.minus(srednieDlaKlasyB);
-			Matrix macierzTransponowanaKlasaB = klasaBMinusSrednia.transpose();
-			Matrix macierzKowariancjiKlasaB = klasaBMinusSrednia.times(macierzTransponowanaKlasaB);
-			Matrix macierzKowariancjiPodzielonaKlasaB = macierzKowariancjiKlasaB
-					.times((double) 1 / klasaB.getColumnDimension());
-			double wyznacznikKlasaB = macierzKowariancjiPodzielonaKlasaB.det();
+			return result;
+		} else {
 
-			sumaWyznacznikowMacierzydlaNcech = wyznacznikKlasaA + wyznacznikKlasaB;
-
-			double fisherr = licznikFisheraDlaNcech / sumaWyznacznikowMacierzydlaNcech;
-
-			if (fisherr > this.fisher) {
-				this.fisher = fisherr;
-				this.cechy = cechy;
+			List<String> wyniki1D = fisherImpl_1D(baza);
+			int nrCechy = 0;
+			// Wyciagam najlepsza ceche z fishera1D
+			for (String a : wyniki1D) {
+				try {
+					nrCechy = Integer.parseInt(a.split(":")[1]) - 1;
+				} catch (Exception e) {
+				}
 			}
 
+			List<Integer> zapisaneCechy = new ArrayList<>();
+			List<tasks.Zadadnie_2> cechyDoSprawdzenia = new ArrayList<>();
+			zapisaneCechy.add(nrCechy);
+
+			for (int l = 0; l < liczba_cech - 1; l++) {
+
+				for (int k = 0; k < tablicaClassA.length; k++) {
+					List<Integer> aktualneCechyDoSprawdzenia = new ArrayList<>(zapisaneCechy);
+
+					if (!(aktualneCechyDoSprawdzenia.contains(k))) {
+						aktualneCechyDoSprawdzenia.add(k);
+						tasks.Zadadnie_2 obj = new Zadadnie_2();
+						int[] cechy = new int[l + 2];
+						Collections.sort(aktualneCechyDoSprawdzenia);
+
+						// Przepisanie cech z listy do tablicy
+						for (int i = 0; i < cechy.length; i++) {
+							cechy[i] = aktualneCechyDoSprawdzenia.get(i);
+						}
+						aktualneCechyDoSprawdzenia.clear();
+
+						double[] srednieDlaNcechKlasaA = new double[l + 2];
+						double[] srednieDlaNcechKlasaB = new double[l + 2];
+						double licznikFisheraDlaNcech = 0;
+						double sumaWyznacznikowMacierzydlaNcech = 0;
+
+						for (int i = 0; i < cechy.length; i++) {
+							srednieDlaNcechKlasaA[i] = liczSrednia(tablicaClassA, cechy[i]);
+							srednieDlaNcechKlasaB[i] = liczSrednia(tablicaClassB, cechy[i]);
+						}
+						Matrix srednieDlaKlasyA = new Matrix(
+								zrobMacierzZeSredniej(srednieDlaNcechKlasaA, tablicaClassA[0].length));
+						Matrix srednieDlaKlasyB = new Matrix(
+								zrobMacierzZeSredniej(srednieDlaNcechKlasaB, tablicaClassB[0].length));
+						Matrix klasaA = new Matrix(zrobMacierzDlaKlasy(cechy, tablicaClassA));
+						Matrix klasaB = new Matrix(zrobMacierzDlaKlasy(cechy, tablicaClassB));
+
+						licznikFisheraDlaNcech = sredniaZMacierzy(srednieDlaNcechKlasaA, srednieDlaNcechKlasaB);
+
+						Matrix klasaAMinusSrednia = klasaA.minus(srednieDlaKlasyA);
+						Matrix macierzTransponowanaKlasaA = klasaAMinusSrednia.transpose();
+						Matrix macierzKowariancjiKlasaA = klasaAMinusSrednia.times(macierzTransponowanaKlasaA);
+						Matrix macierzKowariancjiPodzielonaKlasaA = macierzKowariancjiKlasaA
+								.times((double) 1 / klasaA.getColumnDimension());
+						double wyznacznikKlasaA = macierzKowariancjiPodzielonaKlasaA.det();
+
+						Matrix klasaBMinusSrednia = klasaB.minus(srednieDlaKlasyB);
+						Matrix macierzTransponowanaKlasaB = klasaBMinusSrednia.transpose();
+						Matrix macierzKowariancjiKlasaB = klasaBMinusSrednia.times(macierzTransponowanaKlasaB);
+						Matrix macierzKowariancjiPodzielonaKlasaB = macierzKowariancjiKlasaB
+								.times((double) 1 / klasaB.getColumnDimension());
+						double wyznacznikKlasaB = macierzKowariancjiPodzielonaKlasaB.det();
+
+						sumaWyznacznikowMacierzydlaNcech = wyznacznikKlasaA + wyznacznikKlasaB;
+
+						double fisherr = licznikFisheraDlaNcech / sumaWyznacznikowMacierzydlaNcech;
+
+						obj.setCechy(cechy);
+						obj.setFisher(fisherr);
+						cechyDoSprawdzenia.add(obj);
+					}
+
+				}
+				// Sprwadzenie cech
+				for (tasks.Zadadnie_2 getBestFisher : cechyDoSprawdzenia) {
+					if (getBestFisher.getFisher() > this.fisher) {
+						this.fisher = getBestFisher.getFisher();
+						this.cechy = getBestFisher.getCechy();
+
+					}
+				}
+
+				// Dodanie cech do zapisanych
+				for (int h = 0; h < this.cechy.length; h++) {
+
+					if (!(zapisaneCechy.contains(this.cechy[h]))) {
+						zapisaneCechy.add(this.cechy[h]);
+					}
+				}
+				cechyDoSprawdzenia.clear();
+
+			}
+
+			poprawCechy();
+
+			String wynik = "Najwyzszy fisher dla cech: " + Arrays.toString(cechy) + "\nF" + Arrays.toString(cechy)
+					+ " = " + this.fisher;
+			System.out.println(wynik);
+			List<String> result = new ArrayList<>();
+			result.add(String.valueOf(wynik));
+
+			return result;
 		}
 
-		poprawCechy();
-
-		String wynik = "Najwyzszy fisher dla cech: " + Arrays.toString(cechy) + "\nF(" + Arrays.toString(cechy) + ") = "
-				+ this.fisher;
-		System.out.println(wynik);
-		List<String> result = new ArrayList<>();
-		result.add(String.valueOf(wynik));
-
-		return result;
 	}
 
 	private void poprawCechy() {
@@ -91,7 +200,6 @@ public class Zadanie_1 {
 		if (srednieDlaNcechKlasaA.length == srednieDlaNcechKlasaB.length) {
 			for (int i = 0; i < srednieDlaNcechKlasaA.length; i++) {
 				wynik += Math.pow((srednieDlaNcechKlasaA[i] - srednieDlaNcechKlasaB[i]), 2);
-
 			}
 
 		} else
@@ -127,7 +235,6 @@ public class Zadanie_1 {
 	}
 
 	public List<String> fisherImpl_1D(String[][] baza) throws FileNotFoundException {
-
 
 		List<String> result = new ArrayList<>();
 
@@ -198,11 +305,14 @@ public class Zadanie_1 {
 				bestFisherNo = i;
 			}
 		}
-		
+
 		String wynik = "Najwyzszy fisher dla cechy: " + bestFisherNo + "\nF(" + bestFisherNo + ") = "
 				+ fisher[bestFisherNo];
 		System.out.println(wynik);
+		result.add("Numer cechy:" + String.valueOf(bestFisherNo));
+		result.add("Fisher:" + String.valueOf(fisher[bestFisherNo]));
 		result.add(wynik);
+
 		return result;
 	}
 
