@@ -258,43 +258,61 @@ public class SPMDController {
     	int countA=0;
     	int countB=0;
     	Task3 task = new Task3();
+    	int sum=0;
+    	int sumB=0;
     	if(classifiersComboBoxClassifiers.getValue().equals("KNN")){
-    		for(int i=0;i<beginA || (i>endA && endA<matrixA[0].length) || i<matrixA[0].length ;i++){
-    			if(task.KNN(matrixToTrainingA, matrixToTrainingB, classifiersKElemnts.getValue(), changeColumnToRow(matrixA,i)).equals("a")){
-    				countA++;
-    			}
+    		for(int i=0;i<matrixA[0].length ;i++){
+    			if(i<beginA || (i>endA && endA<matrixA[0].length )){
+	    			sum++;
+	    			if(task.KNN(matrixToTrainingA, matrixToTrainingB, classifiersKElemnts.getValue(), changeColumnToRow(matrixA,i)).equals("a")){
+	    				countA++;
+	    			}
+	    		}
     		}
-    		for(int i=0;i<beginB || (i>endB && endB<matrixB[0].length) || i<matrixB[0].length;i++){
+    		for(int i=0; i<matrixB[0].length;i++){
+    			if(i<beginB || (i>endB && endB<matrixB[0].length)){
+    			sumB++;
     			if(task.KNN(matrixToTrainingA, matrixToTrainingB, classifiersKElemnts.getValue(), changeColumnToRow(matrixB,i)).equals("b")){
         			countB++;
-    			}
+    			}}
     		}
     	}else if(classifiersComboBoxClassifiers.getValue().equals("NN")){
-    		for(int i=0;i<beginA || (i>endA && endA<matrixA[0].length) || i<matrixA[0].length;i++){
-    			if(task.KNN(matrixToTrainingA, matrixToTrainingB, 1, changeColumnToRow(matrixA,i)).equals("a")){
-    				countA++;
+    		for(int i=0; i<matrixA[0].length;i++){
+    			if(i<beginA || (i>endA && endA<matrixA[0].length )){
+	    			sum++;
+	    			if(task.KNN(matrixToTrainingA, matrixToTrainingB, 1, changeColumnToRow(matrixA,i)).equals("a")){
+	    				countA++;
+	    			}
     			}
     		}
-    		for(int i=0;i<beginB || (i>endB && endB<matrixB[0].length) || i<matrixB[0].length;i++){
+    		for(int i=0; i<matrixB[0].length;i++){
+    			if(i<beginB || (i>endB && endB<matrixB[0].length)){
+    			sumB++;
     			if(task.KNN(matrixToTrainingA, matrixToTrainingB, 1, changeColumnToRow(matrixB,i)).equals("b")){
         			countB++;
     			}
-    		}
-    	}else{
-    		for(int i=0;i<beginA || (i>endA && endA<matrixA[0].length )	 || i<matrixA[0].length;i++){
-    			if(task.MN(matrixToTrainingA, matrixToTrainingB, changeColumnToRow(matrixA,i)).equals("a")){
-    				countA++;
     			}
     		}
-    		for(int i=0;i<beginB || (i>endB && endB<matrixB[0].length) || i<matrixB[0].length;i++){
-    			if(task.MN(matrixToTrainingA, matrixToTrainingB, changeColumnToRow(matrixB,i)).equals("b")){
-        			countB++;
+    	}else{
+    		for(int i=0;i<matrixA[0].length;i++){
+    			if(i<beginA || (i>endA && endA<matrixA[0].length )){
+	    			sum++;
+	    			if(task.MN(matrixToTrainingA, matrixToTrainingB, changeColumnToRow(matrixA,i)).equals("a")){
+	    				countA++;
+	    			}
+    			}
+    		}
+    		for(int i=0;i<matrixB[0].length;i++){
+    			if(i<beginB || (i>endB && endB<matrixB[0].length)){
+	    			sumB++;
+	    			if(task.MN(matrixToTrainingA, matrixToTrainingB, changeColumnToRow(matrixB,i)).equals("b")){
+	        			countB++;
+	    			}
     			}
     		}
     	}
-    	double skutecznoscA=countA/(double)difference*100;
-    	double skutecznoscB=countB/(double)differenceB*100;
-    	System.out.println((skutecznoscA+skutecznoscB)/2);
+    	double skutecznoscA=countA/(double)sum*100;
+    	double skutecznoscB=countB/(double)sumB*100;
     	return (skutecznoscA+skutecznoscB)/2;
     }
     
