@@ -18,6 +18,7 @@ import javafx.scene.control.TextField;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import tasks.LoadFromFile;
+import tasks.LosowanieBezPotworzen;
 import tasks.Task3;
 import tasks.Zadanie_1;
 
@@ -205,6 +206,7 @@ public class SPMDController {
         	beginB+=endB;
         	endB=matrixToTrainingB[0].length;
     			sum+=getSimpleClassifierKroswalidation(beginA,endA,beginB,endB);
+    			System.out.println("Suma"+sum);
     		}
     	   	classifiersTextArea.setText("Skutecznoœæ clasyfikatora " + (int)sum/iteration +"%");
     	}else if(classifiersMethodToClissiferComboBox.getValue().equals("Bootstrap")){
@@ -216,16 +218,34 @@ public class SPMDController {
         	int howManyToTrainB=(int) (matrixB[0].length*percent);
         	int[] indexTabA = new int[howManyToTrainA];
         	int[] indexTabB = new int[howManyToTrainB];
-    		for(int i=0; i<howManyToTrainA; i++) {
-    			indexTabA[i]=ThreadLocalRandom.current().nextInt(0, matrixA[0].length + 1);
+        	Random rand = new Random();
+        	
+        	List<Integer> wylosowane = new ArrayList<Integer>();
+    		Random r = new Random();
+    		while(wylosowane.size()!=howManyToTrainA){
+    			int a = r.nextInt(matrixA[0].length) + 1;
+    			if(!wylosowane.contains(a)){
+    				wylosowane.add(a);
+    			}
     		}
-    		for(int i=0; i<howManyToTrainB; i++) {
-    			indexTabB[i]=ThreadLocalRandom.current().nextInt(0, matrixB[0].length + 1);
+    		
+    		for(int i = 0; i < wylosowane.size(); i++) indexTabA[i] = wylosowane.get(i);
+    		wylosowane.clear();
+    		while(wylosowane.size()!=howManyToTrainB){
+    			int a = r.nextInt(matrixB[0].length) + 1;
+    			if(!wylosowane.contains(a)){
+    				wylosowane.add(a);
+    			}
     		}
+    		
+    		for(int i = 0; i < wylosowane.size(); i++) indexTabB[i] = wylosowane.get(i);
+    		wylosowane.clear();
+    		
     		 sum+=getSimpleClassifierBootstrap(indexTabA,indexTabB);
+    		 System.out.println(sum);
     		}
 
-    	   	classifiersTextArea.setText("Skutecznoœæ clasyfikatora " + (int)sum +"%");
+    	   	classifiersTextArea.setText("Skutecznoœæ clasyfikatora " + (int)sum/classifiersIterationNumberBootstrap.getValue() +"%");
     	}else{
     	   	classifiersTextArea.setText("Skutecznoœæ clasyfikatora " + (int)getSimpleClassifier(matrixToTrainingA[0].length,matrixA[0].length,matrixToTrainingB[0].length,matrixB[0].length) +"%");
     	}
@@ -296,42 +316,62 @@ public class SPMDController {
     	int countA=0;
     	int countB=0;
     	Task3 task = new Task3();
+    	int sum=0;
+    	int sumB=0;
     	if(classifiersComboBoxClassifiers.getValue().equals("KNN")){
-    		for(int i=0;!isInIndex(i,trainIndex) && i<matrixA[0].length ;i++){
-    			if(task.KNN(matrixToTrainingA, matrixToTrainingB, classifiersKElemnts.getValue(), changeColumnToRow(matrixA,i)).equals("a")){
-    				countA++;
+    		for(int i=0;i<matrixA[0].length ;i++){
+    			if(!isInIndex(i,trainIndex)){
+    				sum++;
+	    			if(task.KNN(matrixToTrainingA, matrixToTrainingB, classifiersKElemnts.getValue(), changeColumnToRow(matrixA,i)).equals("a")){
+	    				countA++;
+	    			}
     			}
     		}
-    		for(int i=0;!isInIndex(i,trainIndexB) && i<matrixB[0].length;i++){
+    		for(int i=0;i<matrixB[0].length;i++){
+    			if(!isInIndex(i,trainIndexB)){
+    				sumB++;
     			if(task.KNN(matrixToTrainingA, matrixToTrainingB, classifiersKElemnts.getValue(), changeColumnToRow(matrixB,i)).equals("b")){
         			countB++;
     			}
-    		}
-    	}else if(classifiersComboBoxClassifiers.getValue().equals("NN")){
-    		for(int i=0;!isInIndex(i,trainIndex) && i<matrixA[0].length ;i++){
-    			if(task.KNN(matrixToTrainingA, matrixToTrainingB, 1, changeColumnToRow(matrixA,i)).equals("a")){
-    				countA++;
     			}
     		}
-    		for(int i=0;!isInIndex(i,trainIndexB) && i<matrixB[0].length;i++){
-    			if(task.KNN(matrixToTrainingA, matrixToTrainingB, 1, changeColumnToRow(matrixB,i)).equals("b")){
-        			countB++;
+    	}else if(classifiersComboBoxClassifiers.getValue().equals("NN")){
+    		for(int i=0; i<matrixA[0].length ;i++){
+	    			if(isInIndex(i,trainIndex)==false){
+	    				sum++;
+		    			if(task.KNN(matrixToTrainingA, matrixToTrainingB, 1, changeColumnToRow(matrixA,i)).equals("a")){
+		    				countA++;
+	    			}
+    			}
+    		}
+    		for(int i=0;i<matrixB[0].length;i++){
+    			if(isInIndex(i,trainIndexB)==false){
+    				sumB++;
+	    			if(task.KNN(matrixToTrainingA, matrixToTrainingB, 1, changeColumnToRow(matrixB,i)).equals("b")){
+	        			countB++;
+	    			}
     			}
     		}
     	}else{
-    		for(int i=0;!isInIndex(i,trainIndex) && i<matrixA[0].length ;i++){
-    			if(task.MN(matrixToTrainingA, matrixToTrainingB, changeColumnToRow(matrixA,i)).equals("a")){
-    				countA++;
+    		for(int i=0; i<matrixA[0].length ;i++){
+    			if(isInIndex(i,trainIndex)==false){
+    				sum++;
+	    			if(task.MN(matrixToTrainingA, matrixToTrainingB, changeColumnToRow(matrixA,i)).equals("a")){
+	    				countA++;
+	    			}
     			}
     		}
-    		for(int i=0;!isInIndex(i,trainIndexB) && i<matrixB[0].length;i++){
-    			if(task.MN(matrixToTrainingA, matrixToTrainingB, changeColumnToRow(matrixA,i)).equals("b")){
-        			countB++;
+    		for(int i=0;i<matrixB[0].length;i++){
+    			if(isInIndex(i,trainIndexB)==false){
+    				sumB++;
+	    			if(task.MN(matrixToTrainingA, matrixToTrainingB, changeColumnToRow(matrixA,i)).equals("b")){
+	        			countB++;
+	    			}
     			}
     		}
     	}
-    	double skutecznoscA=countA/(double)difference*100;
-    	double skutecznoscB=countB/(double)differenceB*100;
+    	double skutecznoscA=countA/(double)sum*100;
+    	double skutecznoscB=countB/(double)sumB*100;
     	return (skutecznoscA+skutecznoscB)/2;
     }
     private double getSimpleClassifier(int beginA,int endA,int beginB,int endB){
