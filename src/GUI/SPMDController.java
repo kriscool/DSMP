@@ -15,7 +15,6 @@ import javafx.scene.control.TextField;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import tasks.LoadFromFile;
-import tasks.Task3;
 import tasks.Task4;
 import tasks.Zadanie_1;
 
@@ -192,30 +191,35 @@ public class SPMDController {
     		double sum=0.0;
     		int beginA=0;
     		int beginB=0;
+        	int endA=matrixToTrainingA[0].length;
+        	int endB=matrixToTrainingB[0].length;
     		for(int i=0;i<iteration;i++){
     		
     		int howManyToTrainA=(int) (matrixA[0].length*percent);
         	int howManyToTrainB=(int) (matrixB[0].length*percent);
     		matrixToTrainingA=new double[64][howManyToTrainA];
         	matrixToTrainingB=new double[64][howManyToTrainB];
-        	int endA=matrixToTrainingA[0].length;
-        	int endB=matrixToTrainingB[0].length;
+        	int index=0;
         	for(int j=0;j<64;j++){
+        		index=0;
         		for(int a=beginA;a<endA;a++){
-        			matrixToTrainingA[j][a]=matrixA[j][a];
+        			matrixToTrainingA[j][index]=matrixA[j][index];
+        			index++;
         		}
         	}
-        	
+        	index=0;
         	for(int k=0;k<64;k++){
+        		index=0;
         		for(int j=beginB;j<endB;j++){
-        			matrixToTrainingB[k][j]=matrixB[k][j];
+        			matrixToTrainingB[k][index]=matrixB[k][index];
+        			index++;
         		}
         	}
         	beginA+=endA;
         	endA+=matrixToTrainingA[0].length;
         	beginB+=endB;
-        	endB=matrixToTrainingB[0].length;
-        	
+        	endB+=matrixToTrainingB[0].length;
+        	System.out.println(endB);
     			sum+=t.getSimpleClassifierKroswalidation(beginA,endA,beginB,endB,classifiersComboBoxClassifiers.getValue(),matrixA,matrixB,matrixToTrainingA,matrixToTrainingB,classifiersKElemnts.getValue());
     			
     		}
