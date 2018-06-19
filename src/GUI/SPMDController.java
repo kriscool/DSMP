@@ -2,7 +2,9 @@ package GUI;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -13,7 +15,7 @@ import javafx.scene.control.TextField;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import tasks.LoadFromFile;
-import tasks.Task3;
+import tasks.Task4;
 import tasks.Zadanie_1;
 
 public class SPMDController {
@@ -31,9 +33,6 @@ public class SPMDController {
 	ComboBox<Integer> featuresSelectionFeatureNumber;
 
 	@FXML
-	CheckBox featuresSFSMethod;
-
-	@FXML
 	TextArea featuresSelectionTextArea;
 
 	@FXML
@@ -49,6 +48,8 @@ public class SPMDController {
 	Button classifiersSaveFile;
 
 	@FXML
+	ComboBox<Integer> classifiersIterationNumberBootstrap;
+	@FXML
 	Button classifiersExecute;
 
 	@FXML
@@ -63,6 +64,12 @@ public class SPMDController {
 	@FXML
 	ComboBox<Integer> classifiersKElemnts;
 
+	@FXML
+	ComboBox<String> classifiersMethodToClissiferComboBox;
+
+	@FXML
+	CheckBox featuresSFSMethod;
+
 	private LoadFromFile db = new LoadFromFile();
 	private String results[][];
 	private double[][] matrixToTrainingA;
@@ -74,16 +81,26 @@ public class SPMDController {
 		for (int i = 1; i < 65; i++) {
 			featuresSelectionFeatureNumber.getItems().add(i);
 		}
+
+		for (int i = 1; i < 5; i++) {
+			classifiersIterationNumberBootstrap.getItems().add(i);
+		}
 		classifiersComboBoxClassifiers.getItems().add("KNN");
 
 		classifiersComboBoxClassifiers.getItems().add("NN");
 
 		classifiersComboBoxClassifiers.getItems().add("NM");
 
+		classifiersMethodToClissiferComboBox.getItems().add("Normal");
+		classifiersMethodToClissiferComboBox.getSelectionModel().select(0);
+		classifiersMethodToClissiferComboBox.getItems().add("Bootstrap");
+		classifiersMethodToClissiferComboBox.getItems().add("Kroswalidation");
+
 		for (int i = 1; i < 4; i++) {
 			classifiersKElemnts.getItems().add(i);
 		}
 
+		classifiersKElemnts.getSelectionModel().select(0);
 	}
 
 	@FXML
@@ -138,19 +155,24 @@ public class SPMDController {
 		results = db.load(selectedFile);
 		matrixA = crtMatrixClassA(results);
 		matrixB = crtMatrixClassB(results);
+		System.out.println(matrixA[63].length);
 	}
 
 	@FXML
 	private void classifiersSaveFile() {
 	}
 
+	private int iteration;
+	private double percent;
+
 	@FXML
 	private void classifiersTrain() {
-		double percent = Integer.parseInt(classifiersTrainingPart.getText()) / 100.0f;
+		percent = Integer.parseInt(classifiersTrainingPart.getText()) / 100.0f;
 		int howManyToTrainA = (int) (matrixA[0].length * percent);
 		int howManyToTrainB = (int) (matrixB[0].length * percent);
 		matrixToTrainingA = new double[64][howManyToTrainA];
 		matrixToTrainingB = new double[64][howManyToTrainB];
+		iteration = (int) (100 / (percent * 100));
 		for (int i = 0; i < 64; i++) {
 			for (int j = 0; j < howManyToTrainA; j++) {
 				matrixToTrainingA[i][j] = matrixA[i][j];
@@ -166,63 +188,91 @@ public class SPMDController {
 
 	@FXML
 	private void classifiersExecute() {
-		int difference = matrixA[0].length - matrixToTrainingA[0].length;
-		int differenceB = matrixB[0].length - matrixToTrainingB[0].length;
-		int countA = 0;
-		int countB = 0;
-		Task3 task = new Task3();
-		if (classifiersComboBoxClassifiers.getValue().equals("KNN")) {
-			for (int i = matrixToTrainingA[0].length; i < matrixA[0].length; i++) {
-				if (task.KNN(matrixToTrainingA, matrixToTrainingB, classifiersKElemnts.getValue(),
-						changeColumnToRow(matrixA, i)).equals("a")) {
-					countA++;
-				}
-			}
-			for (int i = matrixToTrainingB[0].length; i < matrixB[0].length; i++) {
-				if (task.KNN(matrixToTrainingA, matrixToTrainingB, classifiersKElemnts.getValue(),
-						changeColumnToRow(matrixB, i)).equals("b")) {
-					countB++;
-				}
-			}
-		} else if (classifiersComboBoxClassifiers.getValue().equals("NN")) {
-			for (int i = matrixToTrainingA[0].length; i < matrixA[0].length; i++) {
-				if (task.KNN(matrixToTrainingA, matrixToTrainingB, 1, changeColumnToRow(matrixA, i)).equals("a")) {
-					countA++;
-				}
-			}
-			for (int i = matrixToTrainingB[0].length; i < matrixB[0].length; i++) {
-				if (task.KNN(matrixToTrainingA, matrixToTrainingB, 1, changeColumnToRow(matrixB, i)).equals("b")) {
-					countB++;
-				}
-			}
-		} else {
-			for (int i = matrixToTrainingA[0].length; i < matrixA[0].length; i++) {
-				if (task.MN(matrixToTrainingA, matrixToTrainingB, changeColumnToRow(matrixA, i)).equals("a")) {
-					countA++;
-				}
-			}
-			for (int i = matrixToTrainingB[0].length; i < matrixB[0].length; i++) {
-				if (task.MN(matrixToTrainingA, matrixToTrainingB, changeColumnToRow(matrixB, i)).equals("b")) {
-					countB++;
-				}
-			}
-		}
-		double skutecznoscA = countA / (double) difference * 100;
-		double skutecznoscB = countB / (double) differenceB * 100;
-		classifiersTextArea.setText("Skutecznoœæ clasyfikatora dla klasy A " + (int) skutecznoscA
-				+ " %\nSkutecznoœæ clasyfikatora dla klasy B " + (int) skutecznoscB + " %");
-	}
+		Task4 t = new Task4();
+		if (classifiersMethodToClissiferComboBox.getValue().equals("Kroswalidation")) {
+			double sum = 0.0;
+			int beginA = 0;
+			int beginB = 0;
+			int endA = matrixToTrainingA[0].length;
+			int endB = matrixToTrainingB[0].length;
+			for (int i = 0; i < iteration; i++) {
 
-	private double[] changeColumnToRow(double[][] a, int column) {
-		double[] temp = new double[a.length];
-		for (int i = 0; i < a.length; i++) {
-			for (int j = 0; j < a[0].length; j++) {
-				if (j == column) {
-					temp[i] = a[i][j];
+				int howManyToTrainA = (int) (matrixA[0].length * percent);
+				int howManyToTrainB = (int) (matrixB[0].length * percent);
+				matrixToTrainingA = new double[64][howManyToTrainA];
+				matrixToTrainingB = new double[64][howManyToTrainB];
+				int index = 0;
+				for (int j = 0; j < 64; j++) {
+					index = 0;
+					for (int a = beginA; a < endA; a++) {
+						matrixToTrainingA[j][index] = matrixA[j][index];
+						index++;
+					}
 				}
+				index = 0;
+				for (int k = 0; k < 64; k++) {
+					index = 0;
+					for (int j = beginB; j < endB; j++) {
+						matrixToTrainingB[k][index] = matrixB[k][index];
+						index++;
+					}
+				}
+				beginA += endA;
+				endA += matrixToTrainingA[0].length;
+				beginB += endB;
+				endB += matrixToTrainingB[0].length;
+				System.out.println(endB);
+				sum += t.getSimpleClassifierKroswalidation(beginA, endA, beginB, endB,
+						classifiersComboBoxClassifiers.getValue(), matrixA, matrixB, matrixToTrainingA,
+						matrixToTrainingB, classifiersKElemnts.getValue());
+
 			}
+			classifiersTextArea.setText("Skutecznoœæ clasyfikatora " + (int) sum / iteration + "%");
+		} else if (classifiersMethodToClissiferComboBox.getValue().equals("Bootstrap")) {
+			double sum = 0.0;
+			for (int j = 0; j < classifiersIterationNumberBootstrap.getValue(); j++) {
+
+				int howManyToTrainA = (int) (matrixA[0].length * percent);
+				int howManyToTrainB = (int) (matrixB[0].length * percent);
+				int[] indexTabA = new int[howManyToTrainA];
+				int[] indexTabB = new int[howManyToTrainB];
+
+				List<Integer> wylosowane = new ArrayList<Integer>();
+				Random r = new Random();
+				while (wylosowane.size() != howManyToTrainA) {
+					int a = r.nextInt(matrixA[0].length) + 1;
+					if (!wylosowane.contains(a)) {
+						wylosowane.add(a);
+					}
+				}
+
+				for (int i = 0; i < wylosowane.size(); i++)
+					indexTabA[i] = wylosowane.get(i);
+				wylosowane.clear();
+				while (wylosowane.size() != howManyToTrainB) {
+					int a = r.nextInt(matrixB[0].length) + 1;
+					if (!wylosowane.contains(a)) {
+						wylosowane.add(a);
+					}
+				}
+
+				for (int i = 0; i < wylosowane.size(); i++)
+					indexTabB[i] = wylosowane.get(i);
+				wylosowane.clear();
+
+				sum += t.getSimpleClassifierBootstrap(classifiersComboBoxClassifiers.getValue(), matrixA, matrixB,
+						matrixToTrainingA, matrixToTrainingB, classifiersKElemnts.getValue(), indexTabA, indexTabB);
+			}
+
+			classifiersTextArea.setText(
+					"Skutecznoœæ clasyfikatora " + (int) sum / classifiersIterationNumberBootstrap.getValue() + "%");
+		} else {
+			double sum = t.getSimpleClassifier(matrixToTrainingA[0].length, matrixA[0].length,
+					matrixToTrainingB[0].length, matrixB[0].length, classifiersComboBoxClassifiers.getValue(), matrixA,
+					matrixB, matrixToTrainingA, matrixToTrainingB, classifiersKElemnts.getValue());
+			classifiersTextArea.setText("Skutecznoœæ clasyfikatora " + (int) sum + "%");
 		}
-		return temp;
+
 	}
 
 	double[][] crtMatrixClassA(String[][] baza) {
