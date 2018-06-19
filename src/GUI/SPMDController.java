@@ -205,7 +205,7 @@ public class SPMDController {
 				for (int j = 0; j < 64; j++) {
 					index = 0;
 					for (int a = beginA; a < endA; a++) {
-						matrixToTrainingA[j][index] = matrixA[j][index];
+						matrixToTrainingA[j][index] = matrixA[j][a];
 						index++;
 					}
 				}
@@ -213,18 +213,19 @@ public class SPMDController {
 				for (int k = 0; k < 64; k++) {
 					index = 0;
 					for (int j = beginB; j < endB; j++) {
-						matrixToTrainingB[k][index] = matrixB[k][index];
+						matrixToTrainingB[k][index] = matrixB[k][j];
 						index++;
 					}
 				}
+
+				sum += t.getSimpleClassifierKroswalidation(beginA, endA, beginB, endB,
+						classifiersComboBoxClassifiers.getValue(), matrixA, matrixB, matrixToTrainingA,
+						matrixToTrainingB, classifiersKElemnts.getValue());
+
 				beginA += endA;
 				endA += matrixToTrainingA[0].length;
 				beginB += endB;
 				endB += matrixToTrainingB[0].length;
-				System.out.println(endB);
-				sum += t.getSimpleClassifierKroswalidation(beginA, endA, beginB, endB,
-						classifiersComboBoxClassifiers.getValue(), matrixA, matrixB, matrixToTrainingA,
-						matrixToTrainingB, classifiersKElemnts.getValue());
 
 			}
 			classifiersTextArea.setText("Skutecznoœæ clasyfikatora " + (int) sum / iteration + "%");
